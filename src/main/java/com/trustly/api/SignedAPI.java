@@ -29,11 +29,12 @@ import java.math.BigInteger;
 import java.security.KeyException;
 import java.security.SecureRandom;
 
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
@@ -51,7 +52,9 @@ public class SignedAPI {
 
     private static final String TEST_ENVIRONMENT_API_URL = "https://test.trustly.com/api/1";
     private static final String LIVE_ENVIRONMENT_API_URL = "https://trustly.com/api/1";
+	private static HttpHost proxy;
     private static String apiUrl;
+
 
     /**
      * Method used for initializing a SignatureHandler.
@@ -60,7 +63,7 @@ public class SignedAPI {
      * itself, the private key password is usually an empty string.
      */
     public void init(final String privateKeyPath, final String keyPassword, final String username, final String password) {
-        init(privateKeyPath, keyPassword, username, password, false);
+        init(privateKeyPath, keyPassword, username, password, false, null);
     }
 
     /**
@@ -69,8 +72,10 @@ public class SignedAPI {
      * @param keyPassword Seeing that the private key is somewhat considered a password in
      * itself, the private key password is usually an empty string.
      */
-    public void init(final String privateKeyPath, final String keyPassword, final String username, final String password, final boolean testEnvironment) {
+    public void init(final String privateKeyPath, final String keyPassword, final String username, final String password,
+					 final boolean testEnvironment, final HttpHost proxy) {
         setEnvironment(testEnvironment);
+		this.proxy = proxy;
         try {
             signatureHandler.init(privateKeyPath, keyPassword, username, password, testEnvironment);
         }
@@ -106,15 +111,15 @@ public class SignedAPI {
      */
     private String newHttpPost(final String request) {
         try {
-            final CloseableHttpClient httpClient = HttpClients.createDefault();
-            final HttpPost httpPost = new HttpPost(apiUrl);
-            final StringEntity jsonRequest = new StringEntity(request, "UTF-8");
-            httpPost.addHeader("content-type", "application/json");
-            httpPost.setEntity(jsonRequest);
+            final CloseableHttpClient httpClient = HttpClientBuilder.create().setProxy(proxy).build();
+			final HttpPost httpPost = new HttpPost(apiUrl);
+			final StringEntity jsonRequest = new StringEntity(request, "UTF-8");
+			httpPost.addHeader("content-type", "application/json");
+			httpPost.setEntity(jsonRequest);
 
-            final HttpResponse result = httpClient.execute(httpPost);
-            return EntityUtils.toString(result.getEntity(), "UTF-8");
-        }
+			final HttpResponse result = httpClient.execute(httpPost);
+			return EntityUtils.toString(result.getEntity(), "UTF-8");
+		}
         catch (final IOException e) {
             throw new TrustlyConnectionException("Failed to send request.", e);
         }

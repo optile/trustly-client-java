@@ -35,6 +35,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -194,7 +195,7 @@ public class SignatureHandler {
     private String serializeObject(final Object object) {
         final StringBuilder builder = new StringBuilder();
 
-        if (object instanceof TreeMap || object instanceof LinkedTreeMap) {
+        if (object instanceof TreeMap || object instanceof LinkedTreeMap || object instanceof HashMap) {
             populateStringBuilder(builder, (Map) object);
         }
         else if (object instanceof ArrayList) {
