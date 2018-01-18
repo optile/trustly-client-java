@@ -25,11 +25,8 @@
 package com.trustly.api.security;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -61,17 +58,15 @@ class KeyChain {
 
     /**
      * Loads the merchant private key.
-     * @param privateKey private key as String
+     * @param privateKeyFilename path to and name of private key.
      * @param password Password for the private key. "" or null if key requires no password.
      * @throws KeyException if key failed to load. For example if the path is incorrect.
      */
-    void loadMerchantPrivateKey(String privateKey, final String password) throws KeyException {
+    void loadMerchantPrivateKey(String privateKeyFilename, final String password) throws KeyException {
         try {
-            // Add private key header and footer
-        	privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + privateKey +
-        	    "\n-----END RSA PRIVATE KEY-----";
-
-            final PEMParser pemParser = new PEMParser(new StringReader(privateKey));
+        	final BufferedReader br =  new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(privateKeyFilename)));
+        	
+        	final PEMParser pemParser = new PEMParser(br);
             final Object object = pemParser.readObject();
 
             final PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(password.toCharArray());
