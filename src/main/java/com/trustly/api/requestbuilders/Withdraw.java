@@ -93,6 +93,11 @@ public class Withdraw {
             return this;
         }
 
+        public Build suggestedAmount(final String suggestedAmount) {
+            attributes.put("SuggestedAmount", suggestedAmount);
+            return this;
+        }
+
         public Build country(final String countryISOCode) {
             attributes.put("Country", countryISOCode);
             return this;
