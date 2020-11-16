@@ -97,11 +97,7 @@ public class SignedAPI {
     public Response sendRequest(final Request request) {
         final GsonBuilder gsonBuilder = new GsonBuilder();
 
-        if (request.getMethod() == Method.VIEW_AUTOMATIC_SETTLEMENT_DETAILS_CSV) {
-            gsonBuilder.serializeNulls();
-        }
-
-        final Gson gson = gsonBuilder.create();
+        final Gson gson = gsonBuilder.serializeNulls().create();
 
         signatureHandler.insertCredentials(request);
         signatureHandler.signRequest(request);
